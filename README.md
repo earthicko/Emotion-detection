@@ -16,6 +16,10 @@ Install dependencies:
 ```
 pip install -r requirements.txt
 ```
+Download [atulapra's](https://github.com/atulapra) pre-trained model. Using the download script:
+```
+sh download-model.sh
+```
 
 Run program:
 ```

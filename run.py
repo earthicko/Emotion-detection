@@ -41,32 +41,11 @@ def plot_model_history(model_history):
     plt.show()
 
 # Define data generators
-train_dir = 'data/train'
-val_dir = 'data/test'
-
 num_train = 28709
 num_val = 7178
 batch_size = 64
 num_epoch = 50
 
-train_datagen = ImageDataGenerator(rescale=1./255)
-val_datagen = ImageDataGenerator(rescale=1./255)
-
-train_generator = train_datagen.flow_from_directory(
-        train_dir,
-        target_size=(48,48),
-        batch_size=batch_size,
-        color_mode="grayscale",
-        class_mode='categorical')
-
-validation_generator = val_datagen.flow_from_directory(
-        val_dir,
-        target_size=(48,48),
-        batch_size=batch_size,
-        color_mode="grayscale",
-        class_mode='categorical')
-
-# Create the model
 model = Sequential()
 
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48,48,1)))
