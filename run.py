@@ -4,47 +4,8 @@ import cv2
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-# command line argument
-ap = argparse.ArgumentParser()
-ap.add_argument("--mode",help="train/display")
-a = ap.parse_args()
-mode = a.mode 
-
-def plot_model_history(model_history):
-    """
-    Plot Accuracy and Loss curves given the model_history
-    """
-    fig, axs = plt.subplots(1,2,figsize=(15,5))
-    # summarize history for accuracy
-    axs[0].plot(range(1,len(model_history.history['acc'])+1),model_history.history['acc'])
-    axs[0].plot(range(1,len(model_history.history['val_acc'])+1),model_history.history['val_acc'])
-    axs[0].set_title('Model Accuracy')
-    axs[0].set_ylabel('Accuracy')
-    axs[0].set_xlabel('Epoch')
-    axs[0].set_xticks(np.arange(1,len(model_history.history['acc'])+1),len(model_history.history['acc'])/10)
-    axs[0].legend(['train', 'val'], loc='best')
-    # summarize history for loss
-    axs[1].plot(range(1,len(model_history.history['loss'])+1),model_history.history['loss'])
-    axs[1].plot(range(1,len(model_history.history['val_loss'])+1),model_history.history['val_loss'])
-    axs[1].set_title('Model Loss')
-    axs[1].set_ylabel('Loss')
-    axs[1].set_xlabel('Epoch')
-    axs[1].set_xticks(np.arange(1,len(model_history.history['loss'])+1),len(model_history.history['loss'])/10)
-    axs[1].legend(['train', 'val'], loc='best')
-    fig.savefig('plot.png')
-    plt.show()
-
-# Define data generators
-num_train = 28709
-num_val = 7178
-batch_size = 64
-num_epoch = 50
 
 model = Sequential()
 
@@ -91,7 +52,7 @@ while True:
         maxindex = int(np.argmax(prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-    cv2.imshow('Video', cv2.resize(frame,(1600,960),interpolation = cv2.INTER_CUBIC))
+    cv2.imshow('Video', cv2.resize(frame,(800,480),interpolation = cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
