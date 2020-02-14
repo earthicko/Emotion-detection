@@ -7,6 +7,13 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 import os
 
+# input arg parsing
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--fullscreen', help='Display window in full screen', action='store_true')
+# parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    # action="store_true")
+args = parser.parse_args()
+
 model = Sequential()
 
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48,48,1)))
@@ -53,8 +60,9 @@ while True:
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
     
     # full screen
-    cv2.namedWindow("video", cv2.WND_PROP_FULLSCREEN)          
-    cv2.setWindowProperty("video", cv2.WND_PROP_FULLSCREEN, 1)
+    if args.fullscreen:
+        cv2.namedWindow("video", cv2.WND_PROP_FULLSCREEN)          
+        cv2.setWindowProperty("video", cv2.WND_PROP_FULLSCREEN, 1)
 
     cv2.imshow('video', cv2.resize(frame,(800,480),interpolation = cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord('q'):

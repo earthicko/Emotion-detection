@@ -29,6 +29,11 @@ Run program:
 ```
 python run.py
 ```
+## Options
+To run in full screen:
+```
+python run.py -f
+```
 ## References
 * [atulapra's](https://github.com/atulapra) [Emotion-detection-repo](https://github.com/atulapra/Emotion-detection).
 * "Challenges in Representation Learning: A report on three machine learning contests." I Goodfellow, D Erhan, PL Carrier, A Courville, M Mirza, B
