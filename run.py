@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+import time
 import cv2
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
@@ -10,8 +11,7 @@ import os
 # input arg parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--fullscreen', help='Display window in full screen', action='store_true')
-# parser.add_argument("-v", "--verbose", help="increase output verbosity",
-                    # action="store_true")
+parser.add_argument('-d', '--debug', help='Display debug info', action='store_true')
 args = parser.parse_args()
 
 model = Sequential()
@@ -43,6 +43,9 @@ emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutra
 # start the webcam feed
 cap = cv2.VideoCapture(0)
 while True:
+    # time for fps
+    start_time = time.time()
+
     # Find haar cascade to draw bounding box around face
     ret, frame = cap.read()
     if not ret:
@@ -58,11 +61,16 @@ while True:
         prediction = model.predict(cropped_img)
         maxindex = int(np.argmax(prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-    
+
     # full screen
     if args.fullscreen:
         cv2.namedWindow("video", cv2.WND_PROP_FULLSCREEN)          
         cv2.setWindowProperty("video", cv2.WND_PROP_FULLSCREEN, 1)
+    
+    # debug info
+    if args.debug:    
+        fps = str(int(1.0 / (time.time() - start_time)))
+        cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
     cv2.imshow('video', cv2.resize(frame,(800,480),interpolation = cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord('q'):

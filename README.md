@@ -32,7 +32,11 @@ python run.py
 ## Options
 To run in full screen:
 ```
-python run.py -f
+python run.py --fullscreen
+```
+To show debug info:
+```
+python run.py --debug
 ```
 ## References
 * [atulapra's](https://github.com/atulapra) [Emotion-detection-repo](https://github.com/atulapra/Emotion-detection).
