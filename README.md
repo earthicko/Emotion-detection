@@ -1,7 +1,9 @@
 # Webcam-Emotion-Detection
 This is based entirely on [atulapra's](https://github.com/atulapra) [Emotion-detection-repo](https://github.com/atulapra/Emotion-detection). Forked to this repo since for easier dependency management for use in FabLab projects.
 ## Setup
-This runs best with a virtual environment running python3.7+. If you need to get openCV to run with python3.7, I found this [guide](https://www.pyimagesearch.com/2019/09/16/install-opencv-4-on-raspberry-pi-4-and-raspbian-buster/) useful.
+This runs best with a virtual environment running python3.7+. 
+
+**IMPORTANT:** You need to get openCV to run with python3.7, I found this [guide](https://www.pyimagesearch.com/2019/09/16/install-opencv-4-on-raspberry-pi-4-and-raspbian-buster/) useful.
 
 Start off by cloning the repo:
 ```
