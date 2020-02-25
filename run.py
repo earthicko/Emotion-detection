@@ -1,12 +1,13 @@
-import numpy as np
 import argparse
-import time
-import cv2
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import MaxPooling2D
 import os
+import sys
+import time
+
+import cv2
+import numpy as np
+from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
+                                     MaxPooling2D)
+from tensorflow.keras.models import Sequential
 
 # input arg parsing
 parser = argparse.ArgumentParser()
@@ -14,6 +15,8 @@ parser.add_argument('-f', '--fullscreen',
                     help='Display window in full screen', action='store_true')
 parser.add_argument(
     '-d', '--debug', help='Display debug info', action='store_true')
+parser.add_argument(
+    '-fl', '--flip', help='Flip incoming video signal', action='store_true')
 args = parser.parse_args()
 
 model = Sequential()
@@ -69,7 +72,6 @@ def draw_border(img, pt1, pt2, color=(255, 0, 0), thickness=8, r=15, d=10):
     cv2.line(img, (x2, y2 - r), (x2, y2 - r - d), color, thickness)
     cv2.ellipse(img, (x2 - r, y2 - r), (r, r), 0, 0, 90, color, thickness)
 
-
 # start the webcam feed
 cap = cv2.VideoCapture(0)
 while True:
@@ -78,6 +80,8 @@ while True:
 
     # Find haar cascade to draw bounding box around face
     ret, frame = cap.read()
+    if args.flip:
+        frame = cv2.flip(frame,-1)
     if not ret:
         break
     facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -104,7 +108,11 @@ while True:
     if args.debug:
         fps = str(int(1.0 / (time.time() - start_time)))
         cv2.putText(frame, fps + " fps", (20, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+        if sys.platform == 'linux':
+            temp = str(int(CPUTemperature().temperature)) + " C"
+            cv2.putText(frame, temp, (20, 90),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
     cv2.imshow('video', cv2.resize(
         frame, (800, 480), interpolation=cv2.INTER_CUBIC))
