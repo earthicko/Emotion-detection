@@ -9,6 +9,9 @@ from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
                                      MaxPooling2D)
 from tensorflow.keras.models import Sequential
 
+if sys.platform == 'linux':
+    from gpiozero import CPUTemperature
+
 # input arg parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--fullscreen',
