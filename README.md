@@ -39,9 +39,9 @@ To run in full screen:
 ```
 python run.py --fullscreen
 ```
-To show debug info:
+There various options such as full screen, debug mode and flip the input image. To see these flags use the **help**-argument:
 ```
-python run.py --debug
+python run.py --help
 ```
 ## References
 * [atulapra's](https://github.com/atulapra) [Emotion-detection-repo](https://github.com/atulapra/Emotion-detection).
