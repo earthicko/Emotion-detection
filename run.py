@@ -7,6 +7,8 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 import os
+import sys
+import subprocess
 
 # input arg parsing
 parser = argparse.ArgumentParser()
@@ -40,6 +42,11 @@ cv2.ocl.setUseOpenCL(False)
 # dictionary which assigns each label an emotion (alphabetical order)
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
+def get_gpu_temp():
+    temp = subprocess.check_output(['vcgencmd measure_temp | egrep -o \'[0-9]*\.[0-9]*\''],
+                                    shell=True, universal_newlines=True)
+    return str(float(temp))
+
 # start the webcam feed
 cap = cv2.VideoCapture(0)
 while True:
@@ -70,7 +77,9 @@ while True:
     # debug info
     if args.debug:    
         fps = str(int(1.0 / (time.time() - start_time)))
-        cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+        if sys.platform == 'linux':
+            cv2.putText(frame, get_gpu_temp() + " C (GPU)", (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
     cv2.imshow('video', cv2.resize(frame,(800,480),interpolation = cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord('q'):
