@@ -9,12 +9,20 @@ args = parser.parse_args()
 
 
 class GRBL:
-    def __init__(self, port, timeout, num, pos_max, pos_min):
+
+    def __init__(self, port, timeout, num, pos_max, pos_min, iteration):
         self.port = port
         self.timeout = timeout
         self.num = num
-        self.pos_max = pos_max
-        self.pos_min = pos_min
+        self.pos_max = pos_max  # G Code Value
+        self.pos_min = pos_min  # G Code Value
+        for i in range(3):
+            self.position[i] = 50
+        self.feedrate = 6000
+        self.mode = 'G0'
+        self.iteration = iteration
+        self.iteration_default = iteration
+
         self.port = serial.Serial(port, 115200, timeout=timeout)
         self.port.write(b"\r\n\r\n")
         time.sleep(1)
@@ -42,11 +50,36 @@ class GRBL:
             if args.verbose:
                 print(self.port.readline().decode('utf-8'), end='')
 
-    def home(self, rapid):
+    def reset(self):
+        self.iteration = self.iteration_default
+        for i in range(3):
+            self.position[i] = 50
+        self.feedrate = 6000
+        self.mode = 'G0'
+
+    def iterate(self):
+        if args.verbose:
+            print('GRBL #' + str(self.num) + ' Iteration')
+            print(f'Before Position: {self.position[0]}, {self.position[1]}, {self.position[2]} / ', end='')
+            print(f'Before Iteration: {self.iteration[0]}, {self.iteration[1]}, {self.iteration[2]}')
+        for i in range(3):
+            self.position[i] += self.iteration[i]
+            if self.position[i] > 50:
+                self.position[i] = 100 - self.position[i]   # 100 - 53 = 47
+                self.iteration[i] = - self.iteration[i]
+            elif self.position[i] < 50:
+                self.position[i] = - 100 + self.position[i]   # - 100 + 53 = - 47
+                self.iteration[i] = - self.iteration[i]
+        if args.verbose:
+            print('GRBL #' + str(self.num) + ' Iteration')
+            print(f'After Position: {self.position[0]}, {self.position[1]}, {self.position[2]} / ', end='')
+            print(f'After Iteration: {self.iteration[0]}, {self.iteration[1]}, {self.iteration[2]}')
+
+    def home(self, wait):
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Homing :' + str(self.port.name))
         self.port.write(b"$H\n")
-        if not rapid:
+        if not wait:
             while self.port.in_waiting <= 0:
                 if args.verbose:
                     print('GRBL #' + str(self.num) + ' waiting for homing: ' + str(self.port.name))
@@ -60,32 +93,35 @@ class GRBL:
     def tx(self, msg):
         self.port.write(msg.encode())
 
-    def move(self, pos_x, pos_y, pos_z, feedrate, mode):
+    def set_position(self, position, feedrate, mode):
+        if args.verbose:
+            print('GRBL #' + str(self.num) + ' Position Set ' + str(self.port.name))
+            print(f"Data position X: {self.position[0]} Y: {self.position[1]} Z: {self.position[2]}")
+        for i in range(3):
+            self.position[i] = map_int(position[i], (-50, 50), (self.pos_min, self.pos_max))
+        self.feedrate = feedrate
+        self.mode = mode
+        if args.verbose:
+            print(f"Mapped position X: {self.position[0]} Y: {self.position[1]} Z: {self.position[2]}")
+
+    def move(self):
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Moving ' + str(self.port.name))
-            print(f"Data position X: {pos_x} Y: {pos_y} Z: {pos_z}")
-
-        pos_x = map_int(pos_x, (-50, 50), (self.pos_min, self.pos_max))
-        pos_y = map_int(pos_y, (-50, 50), (self.pos_min, self.pos_max))
-        pos_z = map_int(pos_z, (-50, 50), (self.pos_min, self.pos_max))
-
-        if args.verbose:
-            print(f"Mapped position X: {pos_x} Y: {pos_y} Z: {pos_z}")
-
-        msg = 'G90 ' + mode + ' X' + str(pos_x) + ' Y' + str(pos_y) + ' Z' + str(pos_z) + ' F' + str(feedrate) + '\n'
-
-        if args.verbose:
-            print('Output GCode: ' + msg + ', echo: ', end='')
+        msg = 'G90 ' + self.mode + ' X' + str(self.position[0]) + ' Y' + str(self.position[1]) + ' Z' + str(
+            self.position[2]) + ' F' + str(self.feedrate) + '\n'
         if not args.test:
             self.port.write(msg.encode())
             if args.verbose:
+                print('Output GCode: ' + msg + ', echo: ', end='')
                 print(self.port.readline().decode('utf-8'), end='')
 
     def in_waiting(self):
-        if self.port.in_waiting >= 0:
-            return True
-        else:
-            return False
+        return self.port.in_waiting
+    def close(self):
+        self.port.close()
+    def open(self):
+        self.port.open()
+
 
 
 def map_int(val, src, dst):
