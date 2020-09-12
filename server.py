@@ -99,7 +99,6 @@ grbl = []
 
 
 def showSettings(port_i):
-
     if not args.test:
         if args.verbose:
             print('GRBL #' + str(port_i) + ' Reading settings from ' + str(grbl[port_i].name))
