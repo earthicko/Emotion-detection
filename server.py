@@ -1,4 +1,4 @@
-import serial
+import grbl
 import time
 import argparse
 import websockets
@@ -9,10 +9,10 @@ parser.add_argument('-v', '--verbose', help='Print every debug messages on the c
 parser.add_argument('-t', '--test', help='do not output serial', action='store_true')
 args = parser.parse_args()
 
-emotion_list = ["Angry", "Disgusted", "Fearful",
-                "Happy", "Neutral", "Sad", "Surprised"]
 
 # list port = python -m serial.tools.list_ports
+emotion_list = ["Angry", "Disgusted", "Fearful",
+                "Happy", "Neutral", "Sad", "Surprised"]
 port_dict = {0:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_75830333938351103152-if00',
              1:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_85734323331351204021-if00',
              2:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_85632333136351C050B0-if00',
@@ -25,7 +25,6 @@ port_dict = {0:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_758303339383
              9:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_558383436333513181D0-if00',
              10:'/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_5583834363335161C140-if00',
              11:'/dev/serial/by-id/usb-NicoHood_HoodLoader2_Uno-if00'}
-
 setting_dict = {'homing_cycle':['$22', 1],
                 'homing_feed':['$24', 2000],
                 'homing_seek':['$25', 6000],
@@ -43,9 +42,6 @@ setting_dict = {'homing_cycle':['$22', 1],
                 'y_travel':['$131', 1000],
                 'z_travel':['$132', 1000],
                 }
-
-
-
 position_data_dict = {  "Angry":    [   [19, 50.65, 9.29], [24.85, 8.52, 1.81], [-5.55, 17.87, 1.28], [-9.51, 18.79, -18.11], [30.73, 29.96, 1.46], [9.42, -2.63, 26.25], [33.88, -2.51, -0.55], [-8.27, -20.74, -30.97], [17.03, 26.93, -14.53], [-41.05, -27.66, -3.65], [-48.46, -43.57, -31.81], [-43.75, -23.84, -41.16]
                         ],
                         "Disgusted":[   [-41.2, -13.46, 7.43], [4.1, -12.98, -17.56], [2.96, 33.1, 45.52], [30.42, 5.86, -2.09], [12.2, 28.1, 21.67], [-7.51, -35.22, -38.34], [-19.45, -3.46, -9.97], [-31.68, -42.36, -25.77], [6.2, 25.89, 19.48], [1.32, -2.41, 17.11], [41.23, 43.98, 20.42], [-7.81, -15.71, -1.75]
@@ -64,20 +60,6 @@ position_data_dict = {  "Angry":    [   [19, 50.65, 9.29], [24.85, 8.52, 1.81], 
                         "null":[        [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]
                         ]
                       }
-position_status = [
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1],
-    [1, 1, 1]
-]
 position_status_default = [
     [1, 1, 1],
     [1, 1, 1],
@@ -92,50 +74,7 @@ position_status_default = [
     [1, 1, 1],
     [1, 1, 1]
 ]
-num_of_grbl = 12
-grbl = []
-
-
-
-
-def showSettings(port_i):
-
-    if not args.test:
-        if args.verbose:
-            print('GRBL #' + str(port_i) + ' Reading settings from ' + str(grbl[port_i].name))
-        grbl[port_i].write(b"$$\n")
-        if args.verbose:
-            print(grbl[port_i].read(2000).decode('utf-8'), end='')
-
-def setSettings(port_i):
-    if not args.test:
-        if args.verbose:
-            print('GRBL #'+str(port_i)+' Setting settings to '+str(grbl[port_i].name))
-        for item in setting_dict.keys():
-            if args.verbose:
-                print('Item '+item+'\tset to '+str(setting_dict[item][1])+'\tin adress '+setting_dict[item][0])
-            msg = setting_dict[item][0]+'='+str(setting_dict[item][1])+'\n'
-            grbl[port_i].write(msg.encode())
-            if args.verbose:
-                print(grbl[port_i].readline().decode('utf-8'), end='')
-
-def home(port_i):
-    if not args.test:
-        if args.verbose:
-            print('GRBL #'+str(port_i)+' Homing :'+str(grbl[port_i].name))
-        grbl[port_i].write(b"$H\n")
-        while grbl[port_i].in_waiting <= 0:
-            if args.verbose:
-                print('GRBL #'+str(port_i)+' waiting for homing: '+str(grbl[port_i].name))
-                time.sleep(1)
-        if args.verbose:
-            print(grbl[port_i].readline().decode('utf-8'), end='')
-
-def map_int(val, src, dst):
-    return int(((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0])
-
 def position_iterate(position_data, position_iteration):
-    counter = 0
     global position_status
     for controller_i in range (0, 12):
         for motor_i in range (0, 3):
@@ -151,34 +90,21 @@ def position_iterate(position_data, position_iteration):
                     position_data[controller_i][motor_i] = - position_data[controller_i][motor_i]
                     position_status[controller_i][motor_i] = 1
     return position_data
+def wait_response(ports: grbl.GRBL):
+    for port in ports:
 
-def move(port_i, position_data, feedrate, mode):
-    #position -430 to 0
+position_status = position_status_default
+num_of_grbl = 12
+my_grbl = []
+
+for i in range(num_of_grbl):
     if not args.test:
-        if args.verbose:
-            print('GRBL #'+str(port_i)+' Moving '+str(grbl[port_i].name))
-    x_pos = position_data[port_i][0]
-    y_pos = position_data[port_i][1]
-    z_pos = position_data[port_i][2]
+        my_grbl.append(grbl.GRBL(port_dict[i], timeout=5, num=i, pos_max=-10, pos_min=-420))
+        my_grbl[i].set_settings(setting_dict)
+        my_grbl[i].home(rapid=False)
 
-    if args.verbose:
-        print(f"Data position X: {x_pos} Y: {y_pos} Z: {z_pos}")
 
-    x_pos = map_int(x_pos, (-50, 50), (-430, 0))
-    y_pos = map_int(y_pos, (-50, 50), (-430, 0))
-    z_pos = map_int(z_pos, (-50, 50), (-430, 0))
 
-    if args.verbose:
-        print(f"Mapped position X: {x_pos} Y: {y_pos} Z: {z_pos}")
-
-    msg = 'G90 '+mode+' X'+str(x_pos)+' Y'+str(y_pos)+' Z'+str(z_pos)+' F'+str(feedrate)+'\n'
-
-    if args.verbose:
-        print('Output GCode: ' + msg)
-    if not args.test:
-        grbl[port_i].write(msg.encode())
-        if args.verbose:
-            print(grbl[port_i].readline().decode('utf-8'), end='')
 
 
 serial_wait_timer_mode_change = 3
@@ -208,13 +134,13 @@ async def receiveData(websocket, path):
     global position_status_default
 
     name = await websocket.recv()
-    #print(f"Received data: {name}")
-    #print(f"Last Data:     {name_last}")
+    if args.verbose:
+        print(f"Received data: {name}")
+        print(f"Last Data:     {name_last}")
     if name == name_last:
         consistent_name_counter += 1
     else:
         consistent_name_counter = 0
-    #print('Consistent name counter:'+str(consistent_name_counter))
     if time.time() - serial_last_triggered > serial_wait_timer_for_next_move:
         print(str(serial_wait_timer_for_next_move)+'seconds passed')
         for port_i in range(0, num_of_grbl):
@@ -245,21 +171,6 @@ async def receiveData(websocket, path):
     mode_last = mode
 
 
-for i in range(num_of_grbl):
-    if not args.test:
-        grbl.append(serial.Serial(port_dict[i], 115200, timeout=5))
-        if args.verbose:
-            print('GRBL #' + str(i) + ' added: ' + grbl[i].name)
-
-        grbl[i].write(b"\r\n\r\n")
-        time.sleep(1)  # Wait for grbl to initialize
-        grbl[i].reset_input_buffer()  # Flush startup text in serial input
-        grbl[i].reset_output_buffer()  # Flush startup text in serial input
-
-for i in range(num_of_grbl):
-    setSettings(i)
-    home(i)
-    move(i, position_data_dict['null'], 6000, 'G0')
 
 
 start_server = websockets.serve(receiveData, "localhost", 8765)
