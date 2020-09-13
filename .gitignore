@@ -163,6 +163,6 @@ pip-selfcheck.json
 model.h5
 
 #PyCharm
-.idea
+.idea/*
 
 # End of https://www.gitignore.io/api/macos,python,virtualenv,visualstudiocode
