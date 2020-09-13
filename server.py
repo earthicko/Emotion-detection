@@ -151,7 +151,8 @@ for i in range(num_of_grbl):
         my_grbl.append(grbl.GRBL(port_dict[i], timeout=5, num=i, pos_max=-10, pos_min=-420, iteration=[5, 5, 5]))
         # my_grbl[i].get_settings()
         my_grbl[i].set_settings(setting_dict)
-        my_grbl[i].home(wait=False)
+for device in my_grbl:
+    device.home(wait=False)
 # wait for response of homing ended
 wait_response(my_grbl)
 # initialize position to 'null'
