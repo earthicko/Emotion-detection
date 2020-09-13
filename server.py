@@ -8,6 +8,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', help='Print every debug messages on the console', action='store_true')
 parser.add_argument('-t', '--test', help='do not output serial', action='store_true')
 args = parser.parse_args()
+print('SERVER    :server arguments')
+print('SERVER    :--verbose: ' + str(args.verbose))
+print('SERVER    :--test: ' + str(args.test))
 
 # list port = python -m serial.tools.list_ports
 emotion_list = ["Angry", "Disgusted", "Fearful",
@@ -85,8 +88,10 @@ position_data_dict = {"Angry": [[19, 50.65, 9.29], [24.85, 8.52, 1.81], [-5.55, 
 
 def wait_response(ports):
     while True:
+        if args.test:
+            break
         counter = 0
-        print('Waiting for ', end='')
+        print('SERVER    :Waiting for ', end='')
         for port in ports:
             if port.in_waiting() <= 0:
                 print('#' + str(port.num) + ', ', end='')
@@ -96,8 +101,28 @@ def wait_response(ports):
         print('', end='\n')
         time.sleep(1)
     for port in ports:
-        print('#' + str(port.num) + ': ' + port.rx(), end='')
-    print('\nGot responses from ' + str(len(ports)) + ' devices.')
+        print('SERVER    :#' + str(port.num) + ': ' + port.rx(), end='')
+    print('\nSERVER    :Got responses from ' + str(len(ports)) + ' devices.')
+
+
+def collect_position(ports):
+    counter = 0
+    position = []
+    for new_device in ports:
+        for i in range(3):
+            position.append(new_device.position_data[i])
+            # print(str(position[counter]) + ' ', end='')
+            counter += 1
+    # print('')
+    step = -5
+    for i in range(50, -50, step):
+        for j in range(len(position)):
+            if i >= position[j] > i+step:
+                print('@', end='')
+            else:
+                print('|', end='')
+            print('  ', end='')
+        print('')
 
 
 class TimerHandler:
@@ -141,23 +166,21 @@ class TimerHandler:
     def save_time_next_move(self, time_input):
         self.time_next_move = time_input
         if args.verbose:
-            print("Time until next move: "+str(self.time_next_move))
+            print("TIMER     :Time until next move: " + str(self.time_next_move))
 
 
-num_of_grbl = 1
+num_of_grbl = 12
 my_grbl = []
 
 # initialize
 for i in range(num_of_grbl):
-    if not args.test:
-        my_grbl.append(grbl.GRBL(port_dict[i], timeout=5, num=i, pos_max=-10, pos_min=-420, iteration=[5, 5, 5]))
-        # my_grbl[i].get_settings()
-        my_grbl[i].set_settings(setting_dict)
+    my_grbl.append(grbl.GRBL(port_dict[i], timeout=5, num=i, pos_max=-10, pos_min=-420, iteration=5))
+    # my_grbl[i].get_settings()
+    my_grbl[i].set_settings(setting_dict)
 for device in my_grbl:
     device.home(wait=False)
 # wait for response of homing ended
-if not args.test:
-    wait_response(my_grbl)
+wait_response(my_grbl)
 # initialize position to 'null'
 for device in my_grbl:
     device.set_position(position_data_dict['null'][device.num], 10000, 'G1')
@@ -168,37 +191,40 @@ timer = TimerHandler(time_mode_change=3, time_mode_same=1, threshold=5)
 
 async def receive_data(websocket, path):
     global timer
+    global my_grbl
     received_data = await websocket.recv()
     if args.verbose:
-        print(f"Received data: {received_data}")
-        print(f"Last Data:     {timer.input}")
+        print(f"SERVER    :Received data: {received_data}")
+        print(f"SERVER    :Last Data:     {timer.input}")
     if received_data == timer.input:
         timer.count()
     else:
         timer.reset_counter()
     if timer.is_time_over():
-        print(str(timer.time_next_move) + 'seconds passed')
-        for this_grbl in my_grbl:
-            this_grbl.move()
-            this_grbl.iterate()
+        print('\033[35m' + 'SERVER    :' + str(timer.time_next_move) + 'seconds passed' + '\033[0m')
+        for moving_grbl in my_grbl:
+            moving_grbl.move()
+            moving_grbl.iterate()
         timer.reset_timer()
     else:
-        print(str(timer.time_next_move) + 'seconds not passed')
+        print('\033[35m' + 'SERVER    :' + str(timer.time_next_move) + 'seconds not passed' + '\033[0m')
 
     if timer.should_mode_change() and timer.mode != received_data:
         # change mode
         timer.save_mode(received_data)
-        print(f"Mode change to {timer.mode}")
+        print(f"\033[32mSERVER    :Mode change to {timer.mode}\033[0m")
         timer.save_time_next_move(timer.time_mode_change)
-        for this_grbl in my_grbl:
-            this_grbl.reset()
-            this_grbl.set_position(position_data_dict[timer.mode][this_grbl.num], 10000, 'G0')
+        for changing_grbl in my_grbl:
+            changing_grbl.reset()
+            changing_grbl.set_position(position_data_dict[timer.mode][changing_grbl.num], 10000, 'G0')
+        # collect_position(my_grbl)
     else:
-        print(f"Mode is same to {timer.mode}")
+        print(f"\033[32mSERVER    :Mode is same to {timer.mode}\033[0m")
         timer.save_time_next_move(timer.time_mode_same)
-        for this_grbl in my_grbl:
-            this_grbl.set_position(position=this_grbl.position_data, feedrate=5000, mode='G1')
+        for setting_grbl in my_grbl:
+            setting_grbl.set_position(position=setting_grbl.get_position(), feedrate=5000, mode='G1')
     timer.save_input(received_data)
+    collect_position(my_grbl)
 
 
 start_server = websockets.serve(receive_data, "localhost", 8765)

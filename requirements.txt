@@ -21,3 +21,4 @@ Werkzeug==1.0.0
 wrapt==1.11.2
 pyserial==3.4
 websockets~=8.1
+opencv-python~=4.4.0.42
