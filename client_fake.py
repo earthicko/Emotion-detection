@@ -27,7 +27,8 @@ uri = 'ws://localhost:8765'
 
 async def process():
     while True:
-        protagonistEmotion = emotion_dict[input()]
+        input_data: str = input('next emotion: ')
+        protagonistEmotion = emotion_dict[int(input_data)]
 
         if args.verbose:
             print("T:"+str(ctime(time.time()))+" protagonistEmotion: "+str(protagonistEmotion))
