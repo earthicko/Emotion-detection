@@ -9,7 +9,8 @@ args = parser.parse_args()
 
 
 class GRBL:
-    position = [50, 50, 50]
+    position_data = [50, 50, 50]
+    position_output = [0, 0, 0]
 
     def __init__(self, port, timeout, num, pos_max, pos_min, iteration):
         self.port = port
@@ -18,24 +19,21 @@ class GRBL:
         self.pos_max = pos_max  # G Code Value
         self.pos_min = pos_min  # G Code Value
         for i in range(3):
-            self.position[i] = 50
+            self.position_data[i] = 50
+            self.position_output[i] = pos_max
         self.feedrate = 6000
         self.mode = 'G0'
         self.iteration = iteration
         self.iteration_default = iteration
 
-        if not args.test:
-            self.port = serial.Serial(port, 115200, timeout=timeout)
-            self.port.write(b"\r\n\r\n")
-            time.sleep(1)
-            self.port.reset_output_buffer()  # Flush startup text in serial input
-            self.port.reset_input_buffer()  # Flush startup text in serial input
+        self.port = serial.Serial(port, 115200, timeout=timeout)
+        self.port.write(b"\r\n\r\n")
+        time.sleep(1)
+        self.port.reset_output_buffer()  # Flush startup text in serial input
+        self.port.reset_input_buffer()  # Flush startup text in serial input
 
         if args.verbose:
-            if args.test:
-                print('Dummy GRBL#' + str(num) + ' added')
-            else:
-                print('GRBL #' + str(num) + ' added: ' + self.port.name)
+            print('GRBL #' + str(num) + ' added: ' + self.port.name)
 
     def get_settings(self):
         if args.test:
@@ -66,26 +64,25 @@ class GRBL:
     def reset(self):
         self.iteration = self.iteration_default
         for i in range(3):
-            self.position[i] = 50
+            self.position_data[i] = 50
         self.feedrate = 6000
         self.mode = 'G0'
 
     def iterate(self):
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Iteration')
-            print(f'Before Position: {self.position[0]}, {self.position[1]}, {self.position[2]} / ', end='')
+            print(f'Before Position: {self.position_data[0]}, {self.position_data[1]}, {self.position_data[2]} / ', end='')
             print(f'Before Iteration: {self.iteration[0]}, {self.iteration[1]}, {self.iteration[2]}')
         for i in range(3):
-            self.position[i] += self.iteration[i]
-            if self.position[i] > 50:
-                self.position[i] = 100 - self.position[i]  # 100 - 53 = 47
+            self.position_data[i] += self.iteration[i]
+            if self.position_data[i] > 50:
+                self.position_data[i] = 100 - self.position_data[i]  # 100 - 53 = 47
                 self.iteration[i] = - self.iteration[i]
-            elif self.position[i] < 50:
-                self.position[i] = - 100 + self.position[i]  # - 100 + 53 = - 47
+            elif self.position_data[i] < -50:
+                self.position_data[i] = - 100 + self.position_data[i]  # - 100 + 53 = - 47
                 self.iteration[i] = - self.iteration[i]
         if args.verbose:
-            print('GRBL #' + str(self.num) + ' Iteration')
-            print(f'After Position: {self.position[0]}, {self.position[1]}, {self.position[2]} / ', end='')
+            print(f'After Position: {self.position_data[0]}, {self.position_data[1]}, {self.position_data[2]} / ', end='')
             print(f'After Iteration: {self.iteration[0]}, {self.iteration[1]}, {self.iteration[2]}')
 
     def home(self, wait):
@@ -119,28 +116,37 @@ class GRBL:
 
     def set_position(self, position, feedrate, mode):
         for i in range(3):
-            if position[i] > 50 or position[i] < -50:
-                print("ERROR at: GRBL#" + str(self.num) + ": raw position[" + str(i) + "] out of range: " + str(
+            if position[i] > 50:
+                print("ERROR at: GRBL#" + str(self.num) + ": raw position[" + str(i) + "] overflow: " + str(
                     position[i]))
-        if args.verbose:
-            print(f"Data position X: {position[0]} Y: {position[1]} Z: {position[2]}")
-        for i in range(3):
-            self.position[i] = map_int(position[i], (-50, 50), (self.pos_min, self.pos_max))
-        for i in range(3):
-            if self.position[i] > self.pos_max or position[i] < self.pos_min:
-                print("ERROR at: GRBL#" + str(self.num) + ": mapped position[" + str(i) + "] out of range: " + str(
-                    self.position[i]))
+                self.position_data[i] = 50
+            elif position[i] < -50:
+                print("ERROR at: GRBL#" + str(self.num) + ": raw position[" + str(i) + "] underflow: " + str(
+                    position[i]))
+                self.position_data[i] = -50
+            else:
+                self.position_data[i] = position[i]
         self.feedrate = feedrate
         self.mode = mode
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Position Set ' + str(self.port.name))
-            print(f"Mapped position X: {self.position[0]} Y: {self.position[1]} Z: {self.position[2]}")
+            print(f"Data position X: {self.position_data[0]} Y: {self.position_data[1]} Z: {self.position_data[2]}")
 
     def move(self):
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Moving ' + str(self.port.name))
-        msg = 'G90 ' + self.mode + ' X' + str(self.position[0]) + ' Y' + str(self.position[1]) + ' Z' + str(
-            self.position[2]) + ' F' + str(self.feedrate) + '\n'
+        for i in range(3):
+            self.position_output[i] = map_int(self.position_data[i], (-50, 50), (self.pos_min, self.pos_max))
+            if self.position_output[i] > self.pos_max:
+                print("ERROR at: GRBL#" + str(self.num) + ": mapped position[" + str(i) + "] overflow: " + str(
+                    self.position_data[i]))
+                self.position_output[i] = self.pos_max
+            elif self.position_output[i] < self.pos_min:
+                print("ERROR at: GRBL#" + str(self.num) + ": mapped position[" + str(i) + "] underflow: " + str(
+                    self.position_data[i]))
+                self.position_output[i] = self.pos_min
+        msg = 'G90 ' + self.mode + ' X' + str(self.position_output[0]) + ' Y' + str(self.position_output[1]) + ' Z' + str(
+            self.position_output[2]) + ' F' + str(self.feedrate) + '\n'
         if not args.test:
             self.port.write(msg.encode())
             if args.verbose:
