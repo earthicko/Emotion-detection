@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
-  </component>
   <component name="BranchesTreeState">
     <expand>
       <path>
@@ -18,15 +15,19 @@
         <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
       </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:upstream" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
     </expand>
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebf8a7f4-5f32-4b0e-a81f-e4a3d7f03fde" name="Default" comment="migration to module structure">
+    <list default="true" id="ebf8a7f4-5f32-4b0e-a81f-e4a3d7f03fde" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client.py" beforeDir="false" afterPath="$PROJECT_DIR$/client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/grbl.py" beforeDir="false" afterPath="$PROJECT_DIR$/grbl.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,12 +44,12 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="develop" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1hP6NtjUjsMfyScRGR6eCoPQigW" />
+  <component name="ProjectId" id="1hRZMbD8eir1Z93298BGpLq2AXs" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -191,14 +192,6 @@
       <option name="presentableId" value="Default" />
       <updated>1599610721016</updated>
     </task>
-    <task id="LOCAL-00001" summary="migration to module structure">
-      <created>1599903188545</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1599903188545</updated>
-    </task>
-    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -211,36 +204,18 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="migration to module structure" />
-    <option name="LAST_COMMIT_MESSAGE" value="migration to module structure" />
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="533" y="213" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1599900502081">
+    <state x="147" y="65" key="MergeDialog" timestamp="1599975989960">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="533" y="213" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1599900502081" />
-    <state x="48" y="23" width="1872" height="1057" key="MergeDialog" timestamp="1599911028744">
-      <screen x="48" y="23" width="1872" height="1057" />
-    </state>
-    <state x="48" y="23" width="1872" height="1057" key="MergeDialog/48.23.1872.1057/1920.257.1600.877@48.23.1872.1057" timestamp="1599911028744" />
-    <state x="277" y="57" key="SettingsEditor" timestamp="1599900409698">
+    <state x="147" y="65" key="MergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1599975989960" />
+    <state x="531" y="124" key="git4idea.branch.GitSmartOperationDialog" timestamp="1599975976462">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="277" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1599900409698" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1599902865524">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1599902865524" />
-    <state x="797" y="472" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1599910974028">
-      <screen x="48" y="23" width="1872" height="1057" />
-    </state>
-    <state x="797" y="472" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/48.23.1872.1057/1920.257.1600.877@48.23.1872.1057" timestamp="1599910974028" />
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1599901744214">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1599901744214" />
+    <state x="531" y="124" key="git4idea.branch.GitSmartOperationDialog/0.0.1536.824@0.0.1536.824" timestamp="1599975976462" />
   </component>
 </project>

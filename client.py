@@ -18,8 +18,8 @@ import subprocess
 import asyncio
 import websockets
 
-if sys.platform == 'linux':
-    from gpiozero import CPUTemperature
+# if sys.platform == 'linux':
+#     from gpiozero import CPUTemperature
 
 # input arg parsing
 parser = argparse.ArgumentParser()
@@ -121,10 +121,10 @@ async def process():
         if args.debug:
             fps = str(int(1.0 / (time.time() - start_time)))
             cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            if sys.platform == 'linux':
-                cpu_temp = str(int(CPUTemperature().temperature)) + " C (CPU)"
-                cv2.putText(frame, cpu_temp, (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                cv2.putText(frame, get_gpu_temp() + " C (GPU)", (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            # if sys.platform == 'linux':
+            #     cpu_temp = str(int(CPUTemperature().temperature)) + " C (CPU)"
+            #     cv2.putText(frame, cpu_temp, (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            #     cv2.putText(frame, get_gpu_temp() + " C (GPU)", (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
         #if time.time() - serialOutTimer > refreshRate:
         if args.verbose:

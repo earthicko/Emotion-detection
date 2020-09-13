@@ -9,6 +9,7 @@ args = parser.parse_args()
 
 
 class GRBL:
+    position = [50, 50, 50]
 
     def __init__(self, port, timeout, num, pos_max, pos_min, iteration):
         self.port = port
