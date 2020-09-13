@@ -142,7 +142,7 @@ class TimerHandler:
         self.time_next_move = time
 
 
-num_of_grbl = 12
+num_of_grbl = 1
 my_grbl = []
 
 # initialize
@@ -187,10 +187,12 @@ async def receive_data(websocket, path):
         timer.save_time_next_move(timer.time_mode_change)
         for this_grbl in my_grbl:
             this_grbl.reset()
-            this_grbl.set_position(position_data_dict[timer.mode][this_grbl.num], 10000, 'G1')
+            this_grbl.set_position(position_data_dict[timer.mode][this_grbl.num], 10000, 'G0')
     else:
         print(f"Mode is same to {timer.mode}")
         timer.save_time_next_move(timer.time_mode_same)
+        for this_grbl in my_grbl:
+            this_grbl.set_position(position=this_grbl.position, feedrate=1000, mode='G1')
     timer.save_input(input)
 
 
