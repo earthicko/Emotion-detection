@@ -182,6 +182,8 @@ async def receive_data(websocket, path):
             this_grbl.move()
             this_grbl.iterate()
         timer.reset_timer()
+    else:
+        print(str(timer.time_next_move) + 'seconds not passed')
 
     if timer.should_mode_change() and timer.mode != received_data:
         # change mode
