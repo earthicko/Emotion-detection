@@ -56,85 +56,90 @@ cv2.ocl.setUseOpenCL(False)
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful",
                 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
+
 def get_gpu_temp():
     temp = subprocess.check_output(['vcgencmd measure_temp | egrep -o \'[0-9]*\.[0-9]*\''],
-                                    shell=True, universal_newlines=True)
+                                   shell=True, universal_newlines=True)
     return str(float(temp))
+
 
 # start the webcam feed
 cap = cv2.VideoCapture(0)
 
-# set serial attributes
-portDict = {0: '/dev/ttyUSB0'}
-
 uri = 'ws://localhost:8765'
 
 
-
 async def process():
+    global protagonistEmotion
     while True:
-        # time for fps
-        start_time = time.time()
-
-        # Find haar cascade to draw bounding box around face
-        ret, frame = cap.read()
-
-        if args.flip:
-            frame = cv2.flip(frame, -1)
+        if int(time.strftime('%H', time.localtime(time.time()))) >= 22 or int(
+                time.strftime('%H', time.localtime(time.time()))) < 9:
+            print('Night Time Sleep for 1H')
+            time.sleep(3600)
         else:
-            frame = cv2.flip(frame, 1)
-        if not ret:
-            break
-        facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+            # time for fps
+            start_time = time.time()
 
-        faceIndex = 0
+            # Find haar cascade to draw bounding box around face
+            ret, frame = cap.read()
 
-        for (x, y, w, h) in faces:
-
-            roi_gray = gray[y:y + h, x:x + w]
-            cropped_img = np.expand_dims(np.expand_dims(
-                cv2.resize(roi_gray, (48, 48)), -1), 0)
-            prediction = model.predict(cropped_img)
-            maxindex = int(np.argmax(prediction))
-            if faceIndex == 0:
-                cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (255, 0, 0), 2)
-                protagonistEmotion = emotion_dict[maxindex]
+            if args.flip:
+                frame = cv2.flip(frame, -1)
             else:
-                cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (0, 255, 0), 2)
-            cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-            faceIndex += 1
-        if faces == ():
-            print('no face')
-            protagonistEmotion = 'null'
+                frame = cv2.flip(frame, 1)
+            if not ret:
+                break
+            facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 
-        # full screen
-        if args.fullscreen:
-            cv2.namedWindow("video", cv2.WND_PROP_FULLSCREEN)
-            cv2.setWindowProperty("video", cv2.WND_PROP_FULLSCREEN, 1)
+            faceIndex = 0
 
-        # debug info
-        if args.debug:
-            fps = str(int(1.0 / (time.time() - start_time)))
-            cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            # if sys.platform == 'linux':
-            #     cpu_temp = str(int(CPUTemperature().temperature)) + " C (CPU)"
-            #     cv2.putText(frame, cpu_temp, (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            #     cv2.putText(frame, get_gpu_temp() + " C (GPU)", (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            for (x, y, w, h) in faces:
 
-        #if time.time() - serialOutTimer > refreshRate:
-        if args.verbose:
-            print("T:"+str(ctime(start_time))+" protagonistEmotion: "+str(protagonistEmotion))
+                roi_gray = gray[y:y + h, x:x + w]
+                cropped_img = np.expand_dims(np.expand_dims(
+                    cv2.resize(roi_gray, (48, 48)), -1), 0)
+                prediction = model.predict(cropped_img)
+                maxindex = int(np.argmax(prediction))
+                if faceIndex == 0:
+                    cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (255, 0, 0), 2)
+                    protagonistEmotion = emotion_dict[maxindex]
+                else:
+                    cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (0, 255, 0), 2)
+                cv2.putText(frame, emotion_dict[maxindex], (x + 20, y - 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+                faceIndex += 1
+            if faces == ():
+                print('no face')
+                protagonistEmotion = 'null'
 
-        async with websockets.connect(uri) as websocket:
-            await websocket.send(protagonistEmotion)
+            # full screen
+            if args.fullscreen:
+                cv2.namedWindow("video", cv2.WND_PROP_FULLSCREEN)
+                cv2.setWindowProperty("video", cv2.WND_PROP_FULLSCREEN, 1)
 
-        cv2.imshow('video', cv2.resize(
-            frame, (800, 480), interpolation=cv2.INTER_CUBIC))
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            # debug info
+            if args.debug:
+                fps = str(int(1.0 / (time.time() - start_time)))
+                cv2.putText(frame, fps + " fps", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                # if sys.platform == 'linux':
+                #     cpu_temp = str(int(CPUTemperature().temperature)) + " C (CPU)"
+                #     cv2.putText(frame, cpu_temp, (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                #     cv2.putText(frame, get_gpu_temp() + " C (GPU)", (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+            # if time.time() - serialOutTimer > refreshRate:
+            if args.verbose:
+                print("T:" + str(ctime(start_time)) + " protagonistEmotion: " + str(protagonistEmotion))
+
+            async with websockets.connect(uri) as websocket:
+                await websocket.send(protagonistEmotion)
+
+            cv2.imshow('video', cv2.resize(
+                frame, (800, 480), interpolation=cv2.INTER_CUBIC))
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
 
 asyncio.get_event_loop().run_until_complete(process())
 

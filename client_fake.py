@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 # dictionary which assigns each label an emotion (alphabetical order)
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful",
-                3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
+                3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised", 7: "null"}
 
 
 uri = 'ws://localhost:8765'
@@ -35,7 +35,6 @@ async def process():
 
         async with websockets.connect(uri) as websocket:
             await websocket.send(protagonistEmotion)
-        time.sleep(0.5)
 
 
 asyncio.get_event_loop().run_until_complete(process())

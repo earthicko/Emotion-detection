@@ -193,8 +193,8 @@ async def receive_data(websocket, path):
     global timer
     global my_grbl
     received_data = await websocket.recv()
+    print(f"SERVER    :Received data: {received_data}")
     if args.verbose:
-        print(f"SERVER    :Received data: {received_data}")
         print(f"SERVER    :Last Data:     {timer.input}")
     if received_data == timer.input:
         timer.count()
@@ -204,7 +204,8 @@ async def receive_data(websocket, path):
         print('\033[35m' + 'SERVER    :' + str(timer.time_next_move) + 'seconds passed' + '\033[0m')
         for moving_grbl in my_grbl:
             moving_grbl.move()
-            moving_grbl.iterate()
+            if timer.mode != 'null':
+                moving_grbl.iterate()
         timer.reset_timer()
     else:
         print('\033[35m' + 'SERVER    :' + str(timer.time_next_move) + 'seconds not passed' + '\033[0m')
