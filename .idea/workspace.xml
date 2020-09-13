@@ -24,9 +24,9 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebf8a7f4-5f32-4b0e-a81f-e4a3d7f03fde" name="Default" comment="added fake emotion sender">
+    <list default="true" id="ebf8a7f4-5f32-4b0e-a81f-e4a3d7f03fde" name="Default" comment="revised tester.py">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,7 +224,14 @@
       <option name="project" value="LOCAL" />
       <updated>1599978201658</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="revised tester.py">
+      <created>1599978565087</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1599978565087</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -245,7 +252,8 @@
     <MESSAGE value="fix GRBL class" />
     <MESSAGE value="fix wait_response class" />
     <MESSAGE value="added fake emotion sender" />
-    <option name="LAST_COMMIT_MESSAGE" value="added fake emotion sender" />
+    <MESSAGE value="revised tester.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="revised tester.py" />
   </component>
   <component name="WindowStateProjectService">
     <state x="147" y="65" key="MergeDialog" timestamp="1599977687850">
@@ -256,10 +264,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="406" y="173" key="MultipleFileMergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1599977687875" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1599978205620">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1599978622170">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1599978205620" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1599978622170" />
     <state x="531" y="124" key="git4idea.branch.GitSmartOperationDialog" timestamp="1599975976462">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

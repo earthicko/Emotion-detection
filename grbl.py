@@ -80,7 +80,7 @@ class GRBL:
         if args.verbose:
             print('GRBL #' + str(self.num) + ' Homing :' + str(self.port.name))
         self.port.write(b"$H\n")
-        if not wait:
+        if wait:
             while self.port.in_waiting <= 0:
                 if args.verbose:
                     print('GRBL #' + str(self.num) + ' waiting for homing: ' + str(self.port.name))

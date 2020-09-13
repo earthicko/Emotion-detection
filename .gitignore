@@ -11,6 +11,10 @@
 # Icon must end with two \r
 Icon
 
+#PyCharm
+.idea/*
+.idea/*.*
+
 # Thumbnails
 ._*
 
@@ -162,7 +166,6 @@ pip-selfcheck.json
 # Specific
 model.h5
 
-#PyCharm
-.idea/*
+
 
 # End of https://www.gitignore.io/api/macos,python,virtualenv,visualstudiocode
