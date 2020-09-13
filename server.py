@@ -96,7 +96,7 @@ def wait_response(ports):
         print('', end='\n')
         time.sleep(1)
     for port in ports:
-        print('#' + port.num + ': ' + port.rx(), end='')
+        print('#' + str(port.num) + ': ' + port.rx(), end='')
     print('\nGot responses from ' + str(len(ports)) + ' devices.')
 
 
