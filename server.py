@@ -135,11 +135,11 @@ class TimerHandler:
     def save_mode(self, mode):
         self.mode = mode
 
-    def save_input(self, input):
-        self.input = input
+    def save_input(self, input_input):
+        self.input = input_input
 
-    def save_time_next_move(self, time):
-        self.time_next_move = time
+    def save_time_next_move(self, time_input):
+        self.time_next_move = time_input
 
 
 num_of_grbl = 1
@@ -161,16 +161,16 @@ for device in my_grbl:
     device.set_position(position_data_dict['null'][device.num], 10000, 'G1')
     device.move()
 
-timer = TimerHandler(time_mode_change=3, time_mode_same=1, threshold=10)
+timer = TimerHandler(time_mode_change=3, time_mode_same=1, threshold=5)
 
 
 async def receive_data(websocket, path):
     global timer
-    input = await websocket.recv()
+    received_data = await websocket.recv()
     if args.verbose:
-        print(f"Received data: {input}")
+        print(f"Received data: {received_data}")
         print(f"Last Data:     {timer.input}")
-    if input == timer.input:
+    if received_data == timer.input:
         timer.count()
     else:
         timer.reset_counter()
@@ -181,9 +181,9 @@ async def receive_data(websocket, path):
             this_grbl.iterate()
         timer.reset_timer()
 
-    if timer.should_mode_change() and timer.mode != input:
+    if timer.should_mode_change() and timer.mode != received_data:
         # change mode
-        timer.save_mode(input)
+        timer.save_mode(received_data)
         print(f"Mode change to {timer.mode}")
         timer.save_time_next_move(timer.time_mode_change)
         for this_grbl in my_grbl:
@@ -193,8 +193,8 @@ async def receive_data(websocket, path):
         print(f"Mode is same to {timer.mode}")
         timer.save_time_next_move(timer.time_mode_same)
         for this_grbl in my_grbl:
-            this_grbl.set_position(position=this_grbl.position_data, feedrate=1000, mode='G1')
-    timer.save_input(input)
+            this_grbl.set_position(position=this_grbl.position_data, feedrate=5000, mode='G1')
+    timer.save_input(received_data)
 
 
 start_server = websockets.serve(receive_data, "localhost", 8765)
