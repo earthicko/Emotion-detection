@@ -161,7 +161,7 @@ for device in my_grbl:
     device.set_position(position_data_dict['null'][device.num], 10000, 'G1')
     device.move()
 
-timer = TimerHandler(time_mode_change=3, time_mode_same=1, threshold=10)
+timer = TimerHandler(time_mode_change=3, time_mode_same=1, threshold=5)
 
 
 async def receive_data(websocket, path):
@@ -193,7 +193,7 @@ async def receive_data(websocket, path):
         print(f"Mode is same to {timer.mode}")
         timer.save_time_next_move(timer.time_mode_same)
         for this_grbl in my_grbl:
-            this_grbl.set_position(position=this_grbl.position_data, feedrate=1000, mode='G1')
+            this_grbl.set_position(position=this_grbl.position_data, feedrate=5000, mode='G1')
     timer.save_input(input)
 
 
