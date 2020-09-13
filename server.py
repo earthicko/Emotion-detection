@@ -140,6 +140,8 @@ class TimerHandler:
 
     def save_time_next_move(self, time_input):
         self.time_next_move = time_input
+        if args.verbose:
+            print("Time until next move: "+str(self.time_next_move))
 
 
 num_of_grbl = 1
