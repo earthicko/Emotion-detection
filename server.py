@@ -154,7 +154,8 @@ for i in range(num_of_grbl):
 for device in my_grbl:
     device.home(wait=False)
 # wait for response of homing ended
-wait_response(my_grbl)
+if not args.test:
+    wait_response(my_grbl)
 # initialize position to 'null'
 for device in my_grbl:
     device.set_position(position_data_dict['null'][device.num], 10000, 'G1')
@@ -192,7 +193,7 @@ async def receive_data(websocket, path):
         print(f"Mode is same to {timer.mode}")
         timer.save_time_next_move(timer.time_mode_same)
         for this_grbl in my_grbl:
-            this_grbl.set_position(position=this_grbl.position, feedrate=1000, mode='G1')
+            this_grbl.set_position(position=this_grbl.position_data, feedrate=1000, mode='G1')
     timer.save_input(input)
 
 
